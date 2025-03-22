@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tense Master - Cyberpunk Edition</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .cyberpunk-gradient {
+            background: linear-gradient(45deg, #ff003c, #ff00ff);
+        }
+        .question-container {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid #0ff;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.2);
+        }
+        .option-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid #0ff;
+            transition: all 0.3s ease;
+        }
+        .option-btn:hover {
+            background: rgba(0, 255, 255, 0.2);
+            transform: scale(1.05);
+        }
+        .correct {
+            background: rgba(0, 255, 0, 0.3);
+            border: 1px solid #0f0;
+        }
+        .incorrect {
+            background: rgba(255, 0, 0, 0.3);
+            border: 1px solid #f00;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 min-h-screen text-white">
+    <div class="container mx-auto px-4 py-8">
+        <header class="text-center mb-8">
+            <h1 class="text-4xl font-bold mb-4" style="text-shadow: 0 0 10px #0ff">
+                Tense Master
+            </h1>
+            <div class="flex justify-center space-x-4">
+                <div class="bg-gray-800 p-4 rounded-lg">
+                    <span class="font-bold">Score:</span>
+                    <span id="score">0</span>
+                </div>
+                <div class="bg-gray-800 p-4 rounded-lg">
+                    <span class="font-bold">Time:</span>
+                    <span id="timer">30</span>
+                </div>
+            </div>
+        </header>
+
+        <main class="max-w-2xl mx-auto">
+            <div class="question-container p-8 rounded-xl mb-8">
+                <h2 id="question" class="text-2xl mb-6"></h2>
+                <div id="options" class="space-y-4">
+                    <!-- Options will be dynamically generated here -->
+                </div>
+            </div>
+
+            <div id="final-screen" class="hidden question-container p-8 rounded-xl text-center">
+                <h2 class="text-3xl mb-4">Game Over!</h2>
+                <p class="text-xl mb-6">Your final score is: <span id="final-score">0</span></p>
+                <button onclick="location.reload()" class="cyberpunk-gradient text-white px-6 py-3 rounded-lg hover:scale-105 transition-transform">
+                    Play Again
+                </button>
+            </div>
+        </main>
+    </div>
+
+    <footer class="text-center text-gray-400 py-4">
+        Made with ❤️ by M.Al🚀Butt, M.Azam Jamal, Farhan Ali, M.Kaif Jan, Manahil Imran, Annas Zamir & Eman Ahamd.<br>
+
+        <small>
+            Credits: The Legendary Sir Farman, whose idea was turned into reality by hardwork, determination and sheer fucking will.
+        </small>
+    </footer>
+    
+
+    <script>
+        const questions = [
+            {
+                question: "Which tense is this sentence in? 'I will go to the store tomorrow.'",
+                options: ["Present Simple", "Future Simple", "Past Simple", "Present Continuous"],
+                correct: 1
+            },
+            {
+                question: "Which tense is correct for: 'By next year, I ______ (have) my degree.'?",
+                options: ["have", "am having", "will have", "had"],
+                correct: 2
+            },
+            {
+                question: "Which tense is this sentence in? 'She was studying when I called her.'",
+                options: ["Past Simple", "Past Continuous", "Present Perfect", "Future Perfect"],
+                correct: 1
+            },
+            {
+                question: "Which tense is correct for: 'If I ______ (know) the answer, I would tell you.'",
+                options: ["know", "knew", "have known", "will know"],
+                correct: 1
+            },
+            {
+                question: "Which tense is this sentence in? 'They have already finished their project.'",
+                options: ["Present Perfect", "Past Simple", "Present Simple", "Future Simple"],
+                correct: 0
+            },
+            {
+                question: "Which tense is correct for: 'I ______ (not/be) able to attend the meeting yesterday.'",
+                options: ["was not able to attend", "am not able to attend", "will not be able to attend", "have not been able to attend"],
+                correct: 0
+            },
+            {
+                question: "Which tense is this sentence in? 'By the time she arrives, we will have finished dinner.'",
+                options: ["Future Perfect", "Future Simple", "Past Simple", "Present Perfect"],
+                correct: 0
+            },
+            {
+                question: "Which tense is correct for: 'If I had known about the traffic, I ______ (leave) earlier.'",
+                options: ["would leave", "leave", "have left", "left"],
+                correct: 0
+            },
+            {
+                question: "Which tense is this sentence in? 'He has just arrived at the station.'",
+                options: ["Present Perfect", "Past Simple", "Present Simple", "Future Simple"],
+                correct: 0
+            },
+            {
+                question: "Which tense is correct for: 'When she ______ (finish) her studies, she plans to travel the world.'",
+                options: ["finishes", "will finish", "has finished", "is finishing"],
+                correct: 1
+            }
+        ];
+
+        let currentQuestion = 0;
+        let score = 0;
+        let timeLeft = 30;
+        let timer;
+
+        function loadQuestion() {
+            if (currentQuestion >= questions.length) {
+                showFinalScreen();
+                return;
+            }
+
+            const question = questions[currentQuestion];
+            document.getElementById('question').textContent = question.question;
+            
+            const optionsContainer = document.getElementById('options');
+            optionsContainer.innerHTML = '';
+            
+            question.options.forEach((option, index) => {
+                const button = document.createElement('button');
+                button.className = 'option-btn w-full text-left p-4 rounded-lg';
+                button.textContent = option;
+                button.onclick = () => selectAnswer(index);
+                optionsContainer.appendChild(button);
+            });
+
+            startTimer();
+        }
+
+        function selectAnswer(selectedIndex) {
+            const question = questions[currentQuestion];
+            const options = document.getElementById('options').children;
+            
+            if (selectedIndex === question.correct) {
+                score += 10;
+                options[selectedIndex].classList.add('correct');
+            } else {
+                options[selectedIndex].classList.add('incorrect');
+            }
+
+            document.getElementById('score').textContent = score;
+            
+            setTimeout(() => {
+                currentQuestion++;
+                loadQuestion();
+            }, 1500);
+        }
+
+        function startTimer() {
+            timeLeft = 30;
+            clearInterval(timer);
+            timer = setInterval(() => {
+                timeLeft--;
+                document.getElementById('timer').textContent = timeLeft;
+                
+                if (timeLeft === 0) {
+                    currentQuestion++;
+                    loadQuestion();
+                }
+            }, 1000);
+        }
+
+        function showFinalScreen() {
+            document.getElementById('final-score').textContent = score;
+            document.getElementById('final-screen').classList.remove('hidden');
+            document.getElementById('question').parentElement.classList.add('hidden');
+            clearInterval(timer);
+        }
+
+        // Initialize the game
+        loadQuestion();
+    </script>
+</body>
+</html>
