@@ -405,7 +405,7 @@
 
         function showFinalScreen() {
             clearInterval(timer);
-            document.getElementById('final-score').textContent = `${correctAnswers} out of ${questions.length} questions`;
+            document.getElementById('final-score').textContent = `${correctAnswers} out of ${questions.length} questions were correct`;
             document.getElementById('game-screen').classList.add('hidden');
             document.getElementById('final-screen').classList.remove('hidden');
         }
